@@ -5,6 +5,7 @@ scripts/
 legacy/
 catmaid/
 sam3/
+analysis/
 notebooks/gj*.ipynb
 **/wandb/
 **/__pycache__/

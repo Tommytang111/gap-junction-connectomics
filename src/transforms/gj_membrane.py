@@ -928,7 +928,38 @@ def closest_chemical_synapse(gj_entities: np.ndarray | str, chemical_synapses: n
 if __name__ == "__main__":
     start = time.time()
     
-    print("Calculating relative gap junction intensities for SEM adult & dauer 2... \n")
+    print("Getting entities with connector ID labels for sem adult and then calculating relative gj intensities... \n")
+    
+    # #SEM DAUER 1
+    # #Convert JSON to numpy volume
+    # vol = json_to_volume(json_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_GJs.json",
+    #                volume_shape=(851, 9216, 9728),
+    #                voxel_size=(50,2,2),
+    #                unique_points=True,
+    #                save=False)
+    
+    # #Move points to GJs
+    # vol_downsampled = downsample(vol, (1,4,4), save=False, save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_GJs_connector_ids_downsampled4x.npy")
+    # move_points_to_junctions(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsampled4x.npy",
+    #                          points=vol_downsampled,
+    #                          max_distance=20,
+    #                          save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_moved_GJs_connector_ids_downsampled4x.npy")
+    
+    # #Retain unique GJ entities
+    # point_entities = retain_unique_entity_ids_from_points(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsampled4x.npy",
+    #                                      points="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_moved_GJs_connector_ids_downsampled4x.npy",
+    #                                      save_path="/home/tommy111/scratch/outputs/sem_dauer_1_GJ_connector_id_entities_downsampled4x.npy")
+    
+    # #Calculate GJ relative intensities
+    # df = calculate_gj_relative_intensity(em_volume="/home/tommy111/scratch/outputs/sem_dauer_1_em_volume_downsampled4x.npy",
+    #                                 neuron_membranes="/home/tommy111/scratch/Membranes/SEM_dauer_1/SEM_dauer_1_neuron_membrane_downsampled4x.npy",
+    #                                 neuron_labels="/home/tommy111/scratch/Neurons/SEM_dauer_1/SEM_dauer_1_neurons_only_with_labels_not_uniform_expanded_block_downsampled4x.npy",
+    #                                 unique_entities=point_entities,
+    #                                 radius=50,
+    #                                 save_path="/home/tommy111/projects/def-mzhen/tommy111/outputs/analysis_results/sem_dauer_1/SEM_dauer_1_gj_relative_intensities.pkl")
+    
+    # #Backup plan
+    # df.to_csv("/home/tommy111/projects/def-mzhen/tommy111/outputs/analysis_results/sem_dauer_1/SEM_dauer_1_gj_relative_intensities.csv", index=False)
     
     #SEM DAUER 2
     # #Convert JSON to numpy volume
@@ -943,10 +974,10 @@ if __name__ == "__main__":
     #                          points=vol_downsampled,
     #                          max_distance=20,
     #                          save_path="/home/tommy"
-    #Retain unique GJ entities
+    # #Retain unique GJ entities
     # point_entities = retain_unique_entity_ids_from_points(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_h1qrqboc/sem_dauer_2_s000-972/volume_block_downsampled4x.npy",
     #                                      points="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_2/sem_dauer_2_moved_GJs_connector_ids_downsampled4x.npy",
-    #                                      save="/home/tommy111/scratch/outputs/sem_dauer_2_GJ_connector_id_entities_downsampled4x.npy")
+    #                                      save_path="/home/tommy111/scratch/outputs/sem_dauer_2_GJ_connector_id_entities_downsampled4x.npy")
     # #Calculate GJ relative intensities
     # df = calculate_gj_relative_intensity(em_volume="/home/tommy111/scratch/outputs/sem_dauer_2_em_volume_downsampled4x.npy",
     #                                 neuron_membranes="/home/tommy111/scratch/Membranes/SEM_dauer_2/SEM_dauer_2_neuron_membrane_downsampled4x.npy",
@@ -960,21 +991,21 @@ if __name__ == "__main__":
     
     #SEM ADULT
     #Convert JSON to numpy volume
-    vol = json_to_volume(json_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_adult/sem_adult_GJs.json",
-                   volume_shape=(700, 11008, 19968),
-                   voxel_size=(30,4,4),
-                   unique_points=True,
-                   save=False)
-    #Move points to GJs
-    vol_downsampled = downsample(vol, (1,4,4), save=False, save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_adult/sem_adult_GJs_connector_ids_downsampled4x.npy")
-    points, _, _ = move_points_to_junctions(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_u4lqcs5g/sem_adult_s000-699/volume_block_downsampled4x.npy",
-                             points=vol_downsampled,
-                             max_distance=20,
-                             save_path="/home/tommy111/scratch/outputs/sem_adult_moved_GJs_connector_ids_downsampled4x.npy")
+    # vol = json_to_volume(json_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_adult/sem_adult_GJs.json",
+    #                volume_shape=(700, 11008, 19968),
+    #                voxel_size=(30,4,4),
+    #                unique_points=True,
+    #                save=False)
+    # #Move points to GJs
+    # vol_downsampled = downsample(vol, (1,4,4), save=False, save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_adult/sem_adult_GJs_connector_ids_downsampled4x.npy")
+    # points, _, _ = move_points_to_junctions(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_u4lqcs5g/sem_adult_s000-699/volume_block_downsampled4x.npy",
+    #                          points=vol_downsampled,
+    #                          max_distance=20,
+    #                          save_path="/home/tommy111/scratch/outputs/sem_adult_moved_GJs_connector_ids_downsampled4x.npy")
     #Retain unique GJ entities
     point_entities = retain_unique_entity_ids_from_points(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_u4lqcs5g/sem_adult_s000-699/volume_block_downsampled4x.npy",
-                                         points=points,
-                                         save="/home/tommy111/scratch/outputs/sem_adult_GJ_connector_id_entities_downsampled4x.npy")
+                                         points="/home/tommy111/scratch/outputs/sem_adult_moved_GJs_connector_ids_downsampled4x.npy",
+                                         save_path="/home/tommy111/scratch/outputs/sem_adult_GJ_connector_id_entities_downsampled4x.npy")
     #Calculate GJ relative intensities
     df = calculate_gj_relative_intensity(em_volume="/home/tommy111/scratch/outputs/sem_adult_em_volume_downsampled4x.npy",
                                     neuron_membranes="/home/tommy111/scratch/Membranes/SEM_adult/SEM_adult_neuron_membrane_downsampled4x.npy",

@@ -590,7 +590,6 @@ def retain_entities_from_points(preds:str|np.ndarray, points:str|np.ndarray, rad
     - num_entities (int): Total number of connected components before filtering.
 
     Notes
-    - move_points_to_junctions() is preferred over this function unless using for quick 3D visualization
     - Inputs are cast to uint8; any non-zero value is treated as foreground/point.
     - Uses 26-connectivity for 3D components.
     - np.load errors (e.g., missing files) will propagate.
@@ -835,7 +834,7 @@ def volume_to_slices(volume:str|np.ndarray, output_dir:str, binary:bool=False) -
 if __name__ == "__main__":
     start = time()
     #Job description
-    print('Get enetity statistics for new dauer 1 prediction volume\n')
+    print('Get entity statistics for new dauer 1 prediction volume\n')
 
     #THE EXAMPLE CALLS BELOW SHOULD BE SEARCHED BY KEYWORDS AND USED AS A TEMPLATE
     ###########################################################################################
@@ -851,7 +850,7 @@ if __name__ == "__main__":
     
     point_volume_downsampled = downsample(point_volume, block_size=(1,4,4), save_path="/home/tommy111/scratch/outputs/sem_dauer_1_hc_GJ_points_downsampled4x.npy")
     #2. Points to junctions
-    moved_points, num_points, num_moved_points = move_points_to_junctions(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsasmpled4x.npy",
+    moved_points, num_points, num_moved_points = move_points_to_junctions(preds="",
                                                                           points="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_GJs_block_downsampled4x.npy",
                                                                           max_distance=20,
                                                                           save=True,
@@ -861,7 +860,7 @@ if __name__ == "__main__":
     
     #Obtain NR mask 
     nr_mask = np.load("/home/tommy111/scratch/Neurons/SEM_dauer_1/SEM_dauer_1_NRmask_block_downsampled4x.npy")
-    pred = np.load("/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsasmpled4x.npy").astype(bool)
+    pred = np.load("/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsampled4x.npy").astype(bool)
     nr_constrained_pred = nr_mask & pred
     np.save("/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_constrainedNR_block_downsampled4x.npy", nr_constrained_pred.astype(np.uint8))
                       
@@ -882,8 +881,9 @@ if __name__ == "__main__":
     volume_to_slices(volume=enlarged_point_volume, output_dir="/home/tommy111/scratch/split_volumes/sem_dauer_1_gj_points")
     
     #4. Calculate entity metrics
-    calculate_entity_metrics(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsasmpled4x.npy",
-                             points=moved_points
+    calculate_entity_metrics(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_downsampled4x.npy",
+                             points=moved_points,
+                             nerve_ring_mask=""
                             )
     
     ##############################################################################################################################

@@ -101,5 +101,20 @@ def main():
     
 if __name__ == "__main__":
     main()
-        
     
+"""
+FOR BEN: Different SEM datasets have different membrane extraction and neuron expansion parameters based on proofread observations. 
+See below for expansion parameters.
+Uncomment in main() whatever SEM dataset you want to replicate the analysis for. I have defined the parameters already.      
+
+    Membrane and Neuron Expansion Parameters:
+	• SEM Dauer 1
+		○ Membrane extraction: Dilation with radius=5
+		○ Neuron expansion: Expansion Algorithm 1 with dilation=3
+	• SEM Dauer 2
+		○ Membrane extraction: Dilation with radius=5
+		○ Neuron expansion: Expansion Algorithm 1 with dilation=2
+	• SEM Adult
+		○ Membrane extraction: Sobel gradient with 3x3 kernel
+        ○ Neuron expansion: Expansion Algorithm 1 with dilation=1
+"""

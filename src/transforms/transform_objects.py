@@ -558,10 +558,10 @@ def move_points_to_junctions(preds:str|np.ndarray, points:str|np.ndarray, max_di
         
     return moved_points, total_points, total_moved_points
 
-def retain_entities_from_points(preds:str|np.ndarray, points:str|np.ndarray, radius:int=10, dust_size:int=6, save:bool=True, save_path:str=None) -> tuple[np.ndarray, int]:
+def retain_entities(preds:str|np.ndarray, points:str|np.ndarray, radius:int=10, dust_size:int=6, mode:str="within", save:bool=True, save_path:str=None) -> tuple[np.ndarray, int]:
     """
-    Transform a points array into an entity array by keeping only the closest entity to a point within a specified radius. 
-    This function performs a connected component analysis to identify entities, then computes a distance transform to find 
+    Transform a points array into an entity array by keeping entities within or outside a specified radius of points.
+    This function performs a connected component analysis to identify entities, then computes a distance transform to find
     the closest Euclidian distance to every existing point.
 
     This loads two 3D .npy volumes with shape (Z, Y, X):
@@ -572,10 +572,11 @@ def retain_entities_from_points(preds:str|np.ndarray, points:str|np.ndarray, rad
     - Remove small speckles from the predictions with cc3d.dust(threshold=dust_size, connectivity=26).
     - Label remaining connected components (entities) with 26-connectivity (uint32 labels).
     - Compute a Euclidean distance transform from the point mask.
-    - Keep only entity labels that intersect voxels within `radius` voxels of any point.
+    - Keep entity labels that intersect voxels within `radius` voxels of any point when mode is "within".
+    - Keep entity labels that do not intersect those voxels when mode is "outside".
 
     Parameters
-    preds : str | np.ndarray 
+    preds : str | np.ndarray
         Path to .npy file or actual .npy of the predicted binary volume.
     points : str | np.ndarray
         Path to .npy file or actual .npy of the point-annotation volume.
@@ -583,17 +584,25 @@ def retain_entities_from_points(preds:str|np.ndarray, points:str|np.ndarray, rad
         Neighborhood radius in voxels in the downsampled grid
     dust_size : int, default=6
         Minimum size of connected components to keep in preds.
+    mode : str, default="within"
+        Retains entities within the radius of points when "within", or outside the radius
+        of all points when "outside".
 
     Returns
     - filtered_entity_array (np.ndarray): uint32 labeled volume (same shape as the
-    downsampled inputs) where only entities near points are retained; others set to 0.
+    downsampled inputs) where entities are retained according to `mode`; others set to 0.
     - num_entities (int): Total number of connected components before filtering.
 
     Notes
     - Inputs are cast to uint8; any non-zero value is treated as foreground/point.
     - Uses 26-connectivity for 3D components.
+    - mode must be either "within" or "outside".
     - np.load errors (e.g., missing files) will propagate.
     """
+    #Check mode
+    if mode not in ("within", "outside"):
+        raise ValueError('mode must be either "within" or "outside"')
+
     #Relevant paths
     points = np.load(points).astype(np.uint8) if isinstance(points, str) else points
     preds = np.load(preds).astype(np.uint8) if isinstance(preds, str) else preds
@@ -613,20 +622,24 @@ def retain_entities_from_points(preds:str|np.ndarray, points:str|np.ndarray, rad
     #Create boolean mask of voxels within the specified radius of any point
     near_points = dist_to_points <= radius
 
-    #Keep only entities that overlap with near_points
-    #Step 1: Get intersection of near_points and entity voxels (using boolean AND) and keep only those labels
-    keep_labels = np.unique(entities[near_points & (entities > 0)])
-    
-    #Step 2: Filter entity array to keep only labels found in Step 1
-    filtered_entity_array = np.where(np.isin(entities, keep_labels), entities, 0)
+    #Get intersection of near_points and entity voxels (using boolean AND)
+    labels_near_points = np.unique(entities[near_points & (entities > 0)])
+
+    #Filter entity array according to mode
+    if mode == "within":
+        retain_mask = np.isin(entities, labels_near_points)
+    else:
+        retain_mask = ~np.isin(entities, labels_near_points)
+
+    filtered_entity_array = np.where(retain_mask, entities, 0)
     print("Filtered entity array computed.")
-    
+
     #Save
     if save and save_path is not None:
         check_output_directory(Path(save_path).parent, clear=False)
         np.save(save_path, filtered_entity_array)
         print(f"Filtered entity array saved as {save_path}.")
-        
+
     return filtered_entity_array, num_entities
 
 def retain_unique_entity_ids_from_points(preds: str | np.ndarray, points: str | np.ndarray, save:bool=True, save_path:str=None) -> np.ndarray:
@@ -865,10 +878,11 @@ if __name__ == "__main__":
     np.save("/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_constrainedNR_block_downsampled4x.npy", nr_constrained_pred.astype(np.uint8))
                       
     #3. GJ to entities
-    filtered_entities, num_entities = retain_entities_from_points(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_constrainedNR_block_downsampled4x.npy", 
-                                        points=moved_points,
-                                        save=True,
-                                        save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_NR_entities_downsampled4x.npy")
+    filtered_entities, num_entities = retain_entities(preds="/home/tommy111/projects/def-mzhen/tommy111/outputs/volumetric_results/unet_r1x0hn96/sem_dauer_1_s000-850/volume_constrainedNR_block_downsampled4x.npy",
+                                                       points=moved_points,
+                                                       mode="within",
+                                                       save=True,
+                                                       save_path="/home/tommy111/projects/def-mzhen/tommy111/em_objects/gj_point_annotations/sem_dauer_1/sem_dauer_1_NR_entities_downsampled4x.npy")
     
     #Save Ben's GJ entities to VAST
     filtered_entities_upsampled = upsample(filtered_entities, scale_factors=(1,4,4), save=False)
